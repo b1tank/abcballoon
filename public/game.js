@@ -9,8 +9,10 @@ let balloons = [];
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight - document.getElementById('controls').offsetHeight;
+  const controls = document.getElementById('controls');
+  const container = document.getElementById('canvas-container');
+  canvas.width = container.clientWidth;
+  canvas.height = container.clientHeight;
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -40,12 +42,24 @@ function createBalloon(letter) {
 
 function drawBalloon(balloon) {
   ctx.save();
+  // Draw string/rope
+  ctx.beginPath();
+  ctx.moveTo(balloon.x, balloon.y + balloon.size * 0.7 / 2);
+  ctx.lineTo(balloon.x, balloon.y + balloon.size * 0.7 / 2 + balloon.size * 1.2);
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // Draw vertical ellipse (balloon)
   ctx.beginPath();
   ctx.ellipse(balloon.x, balloon.y, balloon.size/2, balloon.size*0.7/2, 0, 0, 2*Math.PI);
   ctx.fillStyle = balloon.color;
   ctx.fill();
   ctx.strokeStyle = '#888';
+  ctx.lineWidth = 2;
   ctx.stroke();
+
+  // Draw letter
   ctx.font = `${balloon.size/2}px Comic Sans MS, Comic Sans, cursive`;
   ctx.fillStyle = '#fff';
   ctx.textAlign = 'center';
@@ -59,7 +73,7 @@ function updateBalloons() {
     balloon.y -= balloon.speed;
   }
   // Remove balloons that are off the top
-  balloons = balloons.filter(b => b.y + b.size > 0);
+  balloons = balloons.filter(b => b.y + b.size * 0.7 / 2 > 0);
 }
 
 function render() {
