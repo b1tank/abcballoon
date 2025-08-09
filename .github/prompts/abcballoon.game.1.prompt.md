@@ -2,7 +2,7 @@
 mode: agent
 ---
 
-ABC Balloon Game Specification
+Build a simple fun ABC Balloon Game with the following specifications:
 
 1. Overview
 	•	A simple, fun, and interactive alphabet-learning game for kids.
