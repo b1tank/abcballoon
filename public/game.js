@@ -8,6 +8,19 @@ let currentLetterIndex = 0;
 let balloons = [];
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
+// Pre-calculate non-overlapping X positions for 26 balloons
+let balloonXPositions = [];
+function calculateBalloonXPositions() {
+  const margin = 10;
+  const container = document.getElementById('canvas-container');
+  const width = container.clientWidth;
+  const step = (width - 2 * margin) / letters.length;
+  balloonXPositions = [];
+  for (let i = 0; i < letters.length; i++) {
+    balloonXPositions.push(margin + step * i + step / 2);
+  }
+}
+
 function resizeCanvas() {
   const container = document.getElementById('canvas-container');
   // High-DPI support
@@ -18,26 +31,33 @@ function resizeCanvas() {
   canvas.style.height = container.clientHeight + 'px';
   ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
   ctx.scale(dpr, dpr);
+  calculateBalloonXPositions();
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 function randomColor() {
-  const colors = ['#ff6f61', '#6ec6ff', '#ffd54f', '#81c784', '#ba68c8', '#ff8a65', '#4dd0e1', '#f06292', '#a1887f', '#90a4ae'];
+  // Vibrant, kid-friendly colors
+  const colors = [
+    '#FF5252', '#FFB300', '#FFD600', '#69F0AE', '#40C4FF', '#7C4DFF',
+    '#FF4081', '#FF6D00', '#C6FF00', '#00B8D4', '#00E676', '#FF1744',
+    '#F50057', '#D500F9', '#651FFF', '#2979FF', '#00E5FF', '#1DE9B6',
+    '#76FF03', '#FFEA00', '#FFC400', '#FF9100', '#FF3D00', '#C51162',
+    '#AA00FF', '#00BFAE'
+  ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
 function randomSize() {
   return 40 + Math.random() * 40; // 40-80px
 }
-function randomX(size) {
-  return size/2 + Math.random() * (canvas.width / (window.devicePixelRatio || 1) - size);
-}
 
-function createBalloon(letter) {
+function createBalloon(letter, index) {
   const size = randomSize();
+  // Use pre-calculated X position for each letter
+  const x = balloonXPositions[index] || (canvas.width / (window.devicePixelRatio || 1) / 2);
   return {
     letter,
-    x: randomX(size),
+    x,
     y: canvas.height / (window.devicePixelRatio || 1) + size,
     size,
     color: randomColor(),
@@ -130,7 +150,7 @@ function handleKey(e) {
   if (!gameActive) return;
   const key = e.key.toUpperCase();
   if (key === letters[currentLetterIndex]) {
-    balloons.push(createBalloon(key));
+    balloons.push(createBalloon(key, currentLetterIndex));
     currentLetterIndex++;
     if (currentLetterIndex >= letters.length) {
       // Game finished
