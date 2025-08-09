@@ -9,10 +9,15 @@ let balloons = [];
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 function resizeCanvas() {
-  const controls = document.getElementById('controls');
   const container = document.getElementById('canvas-container');
-  canvas.width = container.clientWidth;
-  canvas.height = container.clientHeight;
+  // High-DPI support
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = container.clientWidth * dpr;
+  canvas.height = container.clientHeight * dpr;
+  canvas.style.width = container.clientWidth + 'px';
+  canvas.style.height = container.clientHeight + 'px';
+  ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
+  ctx.scale(dpr, dpr);
 }
 window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
@@ -25,7 +30,7 @@ function randomSize() {
   return 40 + Math.random() * 40; // 40-80px
 }
 function randomX(size) {
-  return size/2 + Math.random() * (canvas.width - size);
+  return size/2 + Math.random() * (canvas.width / (window.devicePixelRatio || 1) - size);
 }
 
 function createBalloon(letter) {
@@ -33,7 +38,7 @@ function createBalloon(letter) {
   return {
     letter,
     x: randomX(size),
-    y: canvas.height + size,
+    y: canvas.height / (window.devicePixelRatio || 1) + size,
     size,
     color: randomColor(),
     speed: 1.5 + Math.random() * 1.5
@@ -44,15 +49,15 @@ function drawBalloon(balloon) {
   ctx.save();
   // Draw string/rope
   ctx.beginPath();
-  ctx.moveTo(balloon.x, balloon.y + balloon.size * 0.7 / 2);
-  ctx.lineTo(balloon.x, balloon.y + balloon.size * 0.7 / 2 + balloon.size * 1.2);
+  ctx.moveTo(balloon.x, balloon.y + balloon.size * 1.1 / 2);
+  ctx.lineTo(balloon.x, balloon.y + balloon.size * 1.1 / 2 + balloon.size * 1.2);
   ctx.strokeStyle = '#888';
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // Draw vertical ellipse (balloon)
+  // Draw tall vertical ellipse (balloon)
   ctx.beginPath();
-  ctx.ellipse(balloon.x, balloon.y, balloon.size/2, balloon.size*0.7/2, 0, 0, 2*Math.PI);
+  ctx.ellipse(balloon.x, balloon.y, balloon.size/2.5, balloon.size*1.1/2, 0, 0, 2*Math.PI);
   ctx.fillStyle = balloon.color;
   ctx.fill();
   ctx.strokeStyle = '#888';
@@ -69,11 +74,20 @@ function drawBalloon(balloon) {
 }
 
 function updateBalloons() {
+  const dpr = window.devicePixelRatio || 1;
+  const topLimit = 0 + 2 + 0.5 * 40; // 2px margin + half min balloon height
   for (let balloon of balloons) {
-    balloon.y -= balloon.speed;
+    // Stop at the top of the canvas
+    const minY = (balloon.size*1.1/2) + 2;
+    if (balloon.y - minY > topLimit) {
+      balloon.y -= balloon.speed;
+      if (balloon.y - minY < topLimit) {
+        balloon.y = topLimit + minY;
+      }
+    }
   }
-  // Remove balloons that are off the top
-  balloons = balloons.filter(b => b.y + b.size * 0.7 / 2 > 0);
+  // Remove balloons that are completely off the top (shouldn't happen now)
+  balloons = balloons.filter(b => b.y + b.size * 1.1 / 2 > 0);
 }
 
 function render() {
