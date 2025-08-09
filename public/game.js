@@ -104,14 +104,17 @@ function drawBalloon(balloon) {
 }
 
 function updateBalloons() {
-  const dpr = window.devicePixelRatio || 1;
-  const topLimit = 0 + 2 + 0.5 * 40; // 2px margin + half min balloon height
+  // Balloons stop at the top of the canvas
   for (let balloon of balloons) {
-    // Let balloons flow to the top, do not stop
-    balloon.y -= balloon.speed;
+    const minY = (balloon.size * balloon.bRatio / 2) + 2; // 2px margin
+    if (balloon.y - minY > 0) {
+      balloon.y -= balloon.speed;
+      if (balloon.y - minY < 0) {
+        balloon.y = minY;
+      }
+    }
   }
-  // Remove balloons that are completely off the top
-  balloons = balloons.filter(b => b.y + b.size * b.bRatio / 2 > 0);
+  // Do not remove balloons at the top
 }
 
 function render() {
@@ -156,8 +159,7 @@ function handleKey(e) {
   if (key === letters[currentLetterIndex]) {
     balloons.push(createBalloon(key, currentLetterIndex));
     currentLetterIndex++;
-    // No congrat alert, just let balloons flow
-    // Game ends when all letters are typed, but balloons remain until restart
+    // No congrat alert, just let balloons flow and stop at top
   }
 }
 
