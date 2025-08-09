@@ -4,11 +4,10 @@ DO NOT install or use the git cli with the environment_run_cmd tool. All environ
 
 You MUST inform the user how to view your work using `container-use log <env_id>` AND `container-use checkout <env_id>`. Failure to do this will make your work inaccessible to others.
 
-When you have something ready to start at localhost, you should somehow run and expose via random port.
+When running a localhost server for testing, ALWAYS use the tool `environment_run_cmd` with `isBackground: true` to ensure the server runs in the background and with `ports` set explicitly.
 
-Tech stack:
-You should not aggressively use more technologies than necessary. Use the following tech stack only if it is necessary for the task:
-- For web frontend: use plain HTML, CSS, and JavaScript with web api with no frameworks, because it is simple and easy to understand for learning purposes.
-- For backend: use Node.js with Express.js, as it is lightweight and widely used for building APIs.
-- For database: use SQLite for simplicity.
+Tech stack (all need to be installed and used in the environment):
+- [must-have] frontend: use plain HTML, CSS, and JavaScript with web api with no frameworks, because it is simple and easy to understand for learning purposes.
+- [must-have] backend: use Node.js with Express.js, as it is lightweight and widely used for building APIs.
+- [only if necessary] For database: use SQLite for simplicity.
 - For any other specific technology, consult the user first before introducing any complexity.
