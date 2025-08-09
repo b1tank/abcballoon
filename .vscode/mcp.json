@@ -1,0 +1,12 @@
+{
+	"servers": {
+		"container-use": {
+			"type": "stdio",
+			"command": "container-use",
+			"args": [
+				"stdio"
+			]
+		}
+	},
+	"inputs": []
+}
