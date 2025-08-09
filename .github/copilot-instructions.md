@@ -6,7 +6,9 @@ DO NOT install or use the git cli with the environment_run_cmd tool. All environ
 
 You MUST inform the user how to view your work using `container-use log <env_id>` AND `container-use checkout <env_id>`. Failure to do this will make your work inaccessible to others.
 
-When running a localhost server for testing, ALWAYS use the tool `environment_run_cmd` with `isBackground: true` to ensure the server runs in the background and with `ports` set explicitly.
+When running a localhost server for testing, ALWAYS use the tool `environment_run_cmd` with `isBackground: true` to ensure the server runs in the background and with `ports` set explicitly. 
+
+If you started the server before, just automatically restart the server every time after making changes to the code without asking the user.
 
 Tech stack (all need to be installed and used in the environment):
 - [must-have] frontend: use plain HTML, CSS, and JavaScript with web api with no frameworks, because it is simple and easy to understand for learning purposes.
