@@ -1,0 +1,66 @@
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Comic Sans MS', 'Comic Sans', cursive, sans-serif;
+  background: #f0f8ff;
+}
+#controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #fff8dc;
+  position: relative;
+  width: 100vw;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  min-height: 60px;
+}
+#controls button {
+  font-size: 1.2rem;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background: #ffb347;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+#controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+#controls button:not(:disabled):hover {
+  background: #ff8800;
+}
+#canvas-container {
+  width: 100vw;
+  height: calc(100vh - 60px);
+  position: relative;
+  background: #e0f7fa;
+  overflow: hidden;
+}
+#balloonCanvas {
+  display: block;
+  width: 100vw;
+  height: 100%;
+  background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+@media (max-width: 600px) {
+  #controls button {
+    font-size: 1rem;
+    padding: 0.4rem 1rem;
+  }
+  #controls {
+    min-height: 50px;
+  }
+  #canvas-container {
+    height: calc(100vh - 50px);
+  }
+}
