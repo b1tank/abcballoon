@@ -50,9 +50,17 @@ function randomColor() {
 function randomSize() {
   return 40 + Math.random() * 40; // 40-80px
 }
+function randomEllipseRatio() {
+  // a: horizontal radius, b: vertical radius
+  // Tall: a/b = 0.3-0.5, b = 0.9-1.2
+  const aRatio = 0.3 + Math.random() * 0.2; // 0.3-0.5
+  const bRatio = 0.9 + Math.random() * 0.3; // 0.9-1.2
+  return { aRatio, bRatio };
+}
 
 function createBalloon(letter, index) {
   const size = randomSize();
+  const { aRatio, bRatio } = randomEllipseRatio();
   // Use pre-calculated X position for each letter
   const x = balloonXPositions[index] || (canvas.width / (window.devicePixelRatio || 1) / 2);
   return {
@@ -61,7 +69,9 @@ function createBalloon(letter, index) {
     y: canvas.height / (window.devicePixelRatio || 1) + size,
     size,
     color: randomColor(),
-    speed: 1.5 + Math.random() * 1.5
+    speed: 1.5 + Math.random() * 1.5,
+    aRatio,
+    bRatio
   };
 }
 
@@ -69,15 +79,15 @@ function drawBalloon(balloon) {
   ctx.save();
   // Draw string/rope
   ctx.beginPath();
-  ctx.moveTo(balloon.x, balloon.y + balloon.size * 1.1 / 2);
-  ctx.lineTo(balloon.x, balloon.y + balloon.size * 1.1 / 2 + balloon.size * 1.2);
+  ctx.moveTo(balloon.x, balloon.y + balloon.size * balloon.bRatio / 2);
+  ctx.lineTo(balloon.x, balloon.y + balloon.size * balloon.bRatio / 2 + balloon.size * 1.2);
   ctx.strokeStyle = '#888';
   ctx.lineWidth = 2;
   ctx.stroke();
 
-  // Draw tall vertical ellipse (balloon)
+  // Draw vertical ellipse (balloon) with random a/b
   ctx.beginPath();
-  ctx.ellipse(balloon.x, balloon.y, balloon.size/2.5, balloon.size*1.1/2, 0, 0, 2*Math.PI);
+  ctx.ellipse(balloon.x, balloon.y, balloon.size * balloon.aRatio, balloon.size * balloon.bRatio / 2, 0, 0, 2 * Math.PI);
   ctx.fillStyle = balloon.color;
   ctx.fill();
   ctx.strokeStyle = '#888';
@@ -97,17 +107,11 @@ function updateBalloons() {
   const dpr = window.devicePixelRatio || 1;
   const topLimit = 0 + 2 + 0.5 * 40; // 2px margin + half min balloon height
   for (let balloon of balloons) {
-    // Stop at the top of the canvas
-    const minY = (balloon.size*1.1/2) + 2;
-    if (balloon.y - minY > topLimit) {
-      balloon.y -= balloon.speed;
-      if (balloon.y - minY < topLimit) {
-        balloon.y = topLimit + minY;
-      }
-    }
+    // Let balloons flow to the top, do not stop
+    balloon.y -= balloon.speed;
   }
-  // Remove balloons that are completely off the top (shouldn't happen now)
-  balloons = balloons.filter(b => b.y + b.size * 1.1 / 2 > 0);
+  // Remove balloons that are completely off the top
+  balloons = balloons.filter(b => b.y + b.size * b.bRatio / 2 > 0);
 }
 
 function render() {
@@ -152,13 +156,8 @@ function handleKey(e) {
   if (key === letters[currentLetterIndex]) {
     balloons.push(createBalloon(key, currentLetterIndex));
     currentLetterIndex++;
-    if (currentLetterIndex >= letters.length) {
-      // Game finished
-      setTimeout(() => {
-        alert('Congratulations! You typed all the letters!');
-        restartGame();
-      }, 100);
-    }
+    // No congrat alert, just let balloons flow
+    // Game ends when all letters are typed, but balloons remain until restart
   }
 }
 
