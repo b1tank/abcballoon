@@ -4,9 +4,11 @@ const startBtn = document.getElementById('startBtn');
 const restartBtn = document.getElementById('restartBtn');
 
 let gameActive = false;
-let currentLetterIndex = 0;
 let balloons = [];
 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
+// Popping effect particles
+let popParticles = [];
 
 // Pre-calculate non-overlapping X positions for 26 balloons
 let balloonXPositions = [];
@@ -103,6 +105,51 @@ function drawBalloon(balloon) {
   ctx.restore();
 }
 
+function createPopParticles(balloon) {
+  // Simple burst effect: colored circles radiating out
+  const particles = [];
+  const count = 12 + Math.floor(Math.random() * 6); // 12-18 particles
+  for (let i = 0; i < count; i++) {
+    const angle = (2 * Math.PI * i) / count;
+    const speed = 2 + Math.random() * 2;
+    particles.push({
+      x: balloon.x,
+      y: balloon.y,
+      radius: 4 + Math.random() * 4,
+      color: balloon.color,
+      dx: Math.cos(angle) * speed,
+      dy: Math.sin(angle) * speed,
+      alpha: 1.0
+    });
+  }
+  return particles;
+}
+
+function updatePopParticles() {
+  for (let i = popParticles.length - 1; i >= 0; i--) {
+    const p = popParticles[i];
+    p.x += p.dx;
+    p.y += p.dy;
+    p.radius *= 0.92;
+    p.alpha *= 0.92;
+    if (p.radius < 1 || p.alpha < 0.1) {
+      popParticles.splice(i, 1);
+    }
+  }
+}
+
+function drawPopParticles() {
+  for (const p of popParticles) {
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, 2 * Math.PI);
+    ctx.fillStyle = p.color;
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
 function updateBalloons() {
   // Balloons stop at the top of the canvas
   for (let balloon of balloons) {
@@ -122,11 +169,13 @@ function render() {
   for (let balloon of balloons) {
     drawBalloon(balloon);
   }
+  drawPopParticles();
 }
 
 function gameLoop() {
   if (gameActive) {
     updateBalloons();
+    updatePopParticles();
     render();
     requestAnimationFrame(gameLoop);
   } else {
@@ -136,8 +185,8 @@ function gameLoop() {
 
 function startGame() {
   gameActive = true;
-  currentLetterIndex = 0;
   balloons = [];
+  popParticles = [];
   startBtn.disabled = true;
   restartBtn.disabled = false;
   window.addEventListener('keydown', handleKey);
@@ -147,6 +196,7 @@ function startGame() {
 function restartGame() {
   gameActive = false;
   balloons = [];
+  popParticles = [];
   render();
   startBtn.disabled = false;
   restartBtn.disabled = true;
@@ -156,10 +206,25 @@ function restartGame() {
 function handleKey(e) {
   if (!gameActive) return;
   const key = e.key.toUpperCase();
-  if (key === letters[currentLetterIndex]) {
-    balloons.push(createBalloon(key, currentLetterIndex));
-    currentLetterIndex++;
-    // No congrat alert, just let balloons flow and stop at top
+  // Check if a balloon with this letter exists on screen
+  const idx = balloons.findIndex(b => b.letter === key);
+  if (idx !== -1) {
+    // Pop the balloon (remove it)
+    const popped = balloons.splice(idx, 1)[0];
+    // Add pop effect
+    popParticles.push(...createPopParticles(popped));
+    // Respawn a new balloon with same letter and horizontal position
+    // Find the index for the letter in the alphabet for X position
+    const letterIndex = letters.indexOf(key);
+    if (letterIndex !== -1) {
+      balloons.push(createBalloon(key, letterIndex));
+    }
+  } else {
+    // If not on screen, spawn a new balloon for this letter
+    const letterIndex = letters.indexOf(key);
+    if (letterIndex !== -1) {
+      balloons.push(createBalloon(key, letterIndex));
+    }
   }
 }
 
