@@ -1,3 +1,6 @@
+---
+applyTo: 'none.sh'
+---
 ALWAYS use ONLY Environments for ANY and ALL file, code, or shell operations—NO EXCEPTIONS—even for simple or generic requests.
 
 Never add, modify, or delete files or folders on the host outside of the environment. All operations must be done within the environment!!!!!
