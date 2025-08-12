@@ -228,6 +228,42 @@ function handleKey(e) {
   }
 }
 
+
+function isPointInBalloon(x, y, balloon) {
+  // Check if (x, y) is inside the ellipse of the balloon
+  // Ellipse: ((x - h)/a)^2 + ((y - k)/b)^2 <= 1
+  const a = balloon.size * balloon.aRatio;
+  const b = balloon.size * balloon.bRatio / 2;
+  const h = balloon.x;
+  const k = balloon.y;
+  return (((x - h) ** 2) / (a ** 2) + ((y - k) ** 2) / (b ** 2)) <= 1;
+}
+
+function handleCanvasClick(e) {
+  if (!gameActive) return;
+  // Adjust for canvas scaling (high-DPI)
+  const rect = canvas.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  const x = (e.clientX - rect.left) * (canvas.width / rect.width) / dpr;
+  const y = (e.clientY - rect.top) * (canvas.height / rect.height) / dpr;
+  // Check balloons from topmost to bottom (reverse order)
+  for (let i = balloons.length - 1; i >= 0; i--) {
+    const balloon = balloons[i];
+    if (isPointInBalloon(x, y, balloon)) {
+      // Pop the balloon
+      const popped = balloons.splice(i, 1)[0];
+      popParticles.push(...createPopParticles(popped));
+      // Respawn a new balloon with same letter and horizontal position
+      const letterIndex = letters.indexOf(popped.letter);
+      if (letterIndex !== -1) {
+        balloons.push(createBalloon(popped.letter, letterIndex));
+      }
+      break; // Only pop one balloon per click
+    }
+  }
+}
+
+canvas.addEventListener('click', handleCanvasClick);
 startBtn.addEventListener('click', startGame);
 restartBtn.addEventListener('click', restartGame);
 
