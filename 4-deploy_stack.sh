@@ -88,7 +88,7 @@ else
        else
            env_json="[]"
        fi
-       update_payload=$(jq -n --arg content "$stack_content" --argjson env "$env_json" '{StackFileContent: $content, Env: $env}')
+       update_payload=$(jq -n --arg content "$stack_content" --argjson env "$env_json" '{StackFileContent: $content, Env: $env, Prune: false, PullImage: true}')
        echo "📝 Update request payload:"
        echo "$update_payload" | jq .
        echo "🔄 Updating stack $stack_name ..."
